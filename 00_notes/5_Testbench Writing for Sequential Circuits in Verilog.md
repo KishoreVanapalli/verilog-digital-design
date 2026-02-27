@@ -1,26 +1,27 @@
-Study Notes: Testbench Writing for Sequential Circuits in Verilog
+# 🧪 Testbench Writing for Sequential Circuits in Verilog
 
-Topic: Verification of Clocked Digital Circuits
-Circuits Covered:
-• D Flip-Flop
-• Reset
-• Counter
-• Shift Register
+**Topic:** Verification of Clocked Digital Circuits
 
-Purpose:
+**Circuits Covered:**
+* D Flip-Flop
+* Reset
+* Counter
+* Shift Register
+
+**Purpose:**
 To verify correct timing, state transitions, and output behavior of sequential circuits using simulation.
 
 ---
 
- 1. Role of Testbench for Sequential Circuits
+## 1. Role of Testbench for Sequential Circuits
 
 Sequential circuits depend on:
 
- Clock edges
- Reset behavior
- Previous state
+* Clock edges
+* Reset behavior
+* Previous state
 
-So testbench must:
+So a testbench must:
 
 1. Generate a clock
 2. Apply reset
@@ -28,11 +29,11 @@ So testbench must:
 4. Observe outputs at clock edges
 5. Check correct state transitions
 
-Unlike combinational logic, you must synchronize stimulus with clock.
+Unlike combinational logic, stimulus must be synchronized with the clock.
 
 ---
 
- 2. General Structure of a Sequential Testbench
+## 2. General Structure of a Sequential Testbench
 
 ```verilog
 module tb_seq;
@@ -51,7 +52,7 @@ module tb_seq;
     );
 
     // Clock generation
-    always 5 clk = ~clk;
+    always #5 clk = ~clk;
 
     // Stimulus
     initial begin
@@ -62,7 +63,7 @@ module tb_seq;
 endmodule
 ```
 
-Main components:
+**Main components:**
 
 1. Signal declarations
 2. DUT instantiation
@@ -73,54 +74,51 @@ Main components:
 
 ---
 
- 3. Clock Generation
+## 3. Clock Generation
 
 Clock is mandatory for sequential circuits.
 
 ```verilog
 initial begin
     clk = 0;
-    forever 5 clk = ~clk;
+    forever #5 clk = ~clk;
 end
 ```
 
-Period = 10 time units
-Clock drives flip-flops, counters, shift registers.
+* Period = 10 time units
+* Drives flip-flops, counters, and shift registers
 
 ---
 
- 4. Reset Handling in Testbench
+## 4. Reset Handling in Testbench
 
 Reset must be asserted at start.
 
 ```verilog
 initial begin
     rst = 1;
-    20 rst = 0;
+    #20 rst = 0;
 end
 ```
 
-Why:
+**Why reset is needed:**
 
- Avoid `X` states
- Initialize registers
- Match real hardware behavior
+* Avoids `X` states
+* Initializes registers
+* Matches real hardware behavior
 
 ---
 
- 5. Testbench for D Flip-Flop
+## 5. Testbench for D Flip-Flop
 
- DUT Behavior:
-
+**DUT Behavior:**
 On every rising edge:
 
-```id="t1"
+```
 q <= d
 ```
 
----
-
- Testbench Code
+### Testbench Code
 
 ```verilog
 module tb_dff;
@@ -131,20 +129,20 @@ wire q;
 dff dut (.clk(clk), .rst(rst), .d(d), .q(q));
 
 // Clock
-always 5 clk = ~clk;
+always #5 clk = ~clk;
 
 initial begin
     clk = 0;
     rst = 1;
     d = 0;
 
-    10 rst = 0;   // release reset
+    #10 rst = 0;
 
-    10 d = 1;
-    10 d = 0;
-    10 d = 1;
+    #10 d = 1;
+    #10 d = 0;
+    #10 d = 1;
 
-    50 $finish;
+    #50 $finish;
 end
 
 initial begin
@@ -154,23 +152,17 @@ end
 endmodule
 ```
 
- What to Check:
+**What to check:**
 
- `q` changes only at clock edge
- `q` equals previous `d`
- Reset forces `q = 0`
-
----
-
- 6. Testbench for Counter
-
- DUT:
-
-4-bit up counter
+* `q` changes only at clock edge
+* `q` equals previous `d`
+* Reset forces `q = 0`
 
 ---
 
- Testbench Code
+## 6. Testbench for Counter
+
+**DUT:** 4-bit up counter
 
 ```verilog
 module tb_counter;
@@ -180,15 +172,14 @@ wire [3:0] count;
 
 up_counter dut (.clk(clk), .rst(rst), .count(count));
 
-always 5 clk = ~clk;
+always #5 clk = ~clk;
 
 initial begin
     clk = 0;
     rst = 1;
 
-    12 rst = 0;   // deassert reset
-
-    100 $finish;
+    #12 rst = 0;
+    #100 $finish;
 end
 
 initial begin
@@ -198,24 +189,24 @@ end
 endmodule
 ```
 
- What to Verify:
+**What to verify:**
 
-```id="t2"
+```
 0000 → 0001 → 0010 → … → 1111 → 0000
 ```
 
- Increments each clock
- Resets to zero
- Wraps correctly
+* Increments each clock
+* Resets correctly
+* Wraps properly
 
 ---
 
- 7. Testbench for MOD-N Counter (MOD-10)
+## 7. Testbench for MOD-N Counter (MOD-10)
 
 ```verilog
 initial begin
     rst = 1;
-    10 rst = 0;
+    #10 rst = 0;
 
     repeat(15) begin
         @(posedge clk);
@@ -226,22 +217,16 @@ initial begin
 end
 ```
 
-Verify:
+**Verify:**
 
- Resets at 9
- Returns to 0
-
----
-
- 8. Testbench for Shift Register
-
- DUT:
-
-4-bit right shift register
+* Resets at 9
+* Returns to 0
 
 ---
 
- Testbench Code
+## 8. Testbench for Shift Register
+
+**DUT:** 4-bit right shift register
 
 ```verilog
 module tb_shift;
@@ -251,21 +236,21 @@ wire [3:0] q;
 
 shift_right dut (.clk(clk), .rst(rst), .sin(sin), .q(q));
 
-always 5 clk = ~clk;
+always #5 clk = ~clk;
 
 initial begin
     clk = 0;
     rst = 1;
     sin = 0;
 
-    10 rst = 0;
+    #10 rst = 0;
 
-    sin = 1; 10;
-    sin = 0; 10;
-    sin = 1; 10;
-    sin = 1; 10;
+    sin = 1; #10;
+    sin = 0; #10;
+    sin = 1; #10;
+    sin = 1; #10;
 
-    50 $finish;
+    #50 $finish;
 end
 
 initial begin
@@ -275,20 +260,20 @@ end
 endmodule
 ```
 
- Expected Behavior:
+**Expected behavior:**
 
-```id="t3"
+```
 sin=1 → q=1000  
 sin=0 → q=0100  
 sin=1 → q=1010  
-sin=1 → q=1101
+sin=1 → q=1101  
 ```
 
 ---
 
- 9. Using Event Control for Accurate Sampling
+## 9. Event Control for Accurate Sampling
 
-Instead of `10`, better style:
+Better than using `#10`:
 
 ```verilog
 @(posedge clk);
@@ -304,16 +289,16 @@ d = 0;
 
 Ensures:
 
- Input is stable before clock
- Sampling matches real hardware
+* Input stable before clock
+* Sampling matches real hardware
 
 ---
 
- 10. Self-Checking Testbench (Counter Example)
+## 10. Self-Checking Testbench (Counter Example)
 
 ```verilog
 initial begin
-    rst = 1; 10 rst = 0;
+    rst = 1; #10 rst = 0;
     repeat(16) begin
         @(posedge clk);
         if (count !== expected)
@@ -323,11 +308,11 @@ initial begin
 end
 ```
 
-This removes manual waveform checking.
+Eliminates manual waveform checking.
 
 ---
 
- 11. Dumping Waveforms
+## 11. Dumping Waveforms
 
 ```verilog
 initial begin
@@ -338,36 +323,36 @@ end
 
 Used with GTKWave to visualize:
 
- Clock
- Reset
- Inputs
- Outputs
+* Clock
+* Reset
+* Inputs
+* Outputs
 
 ---
 
- 12. Common Testbench Mistakes
+## 12. Common Testbench Mistakes
 
 1. No clock generation
 2. No reset applied
-3. Changing input exactly at clock edge
+3. Changing input at clock edge
 4. Not observing outputs at posedge
 5. Forgetting `$finish`
 6. Testing only one case
 
 ---
 
- 13. Difference: Combinational vs Sequential Testbench
+## 13. Combinational vs Sequential Testbench
 
-| Feature       | Combinational | Sequential    |
-| ------------- | ------------- | ------------- |
-| Clock         | Not required  | Required      |
-| Reset         | Not needed    | Required      |
-| Input timing  | Any time      | Sync to clock |
-| Output change | Immediate     | On clock edge |
+| Feature       | Combinational | Sequential |
+| ------------- | ------------- | ---------- |
+| Clock         | Not required  | Required   |
+| Reset         | Not needed    | Required   |
+| Input timing  | Any time      | Clock sync |
+| Output change | Immediate     | Clock edge |
 
 ---
 
- 14. Best Practices
+## 14. Best Practices
 
 1. Generate clean clock
 2. Apply reset first
@@ -378,19 +363,19 @@ Used with GTKWave to visualize:
 
 ---
 
- 15. Hardware Meaning of Testbench Stimulus
+## 15. Hardware Meaning of Testbench Stimulus
 
-| Testbench Action     | Hardware Meaning   |
-| -------------------- | ------------------ |
-| `always 5 clk=~clk` | Oscillator         |
-| `rst=1`              | Reset line         |
-| `@(posedge clk)`     | Flip-flop sampling |
-| `sin=1`              | Serial input       |
-| `count`              | Register output    |
+| Testbench Action     | Hardware Meaning |
+| -------------------- | ---------------- |
+| `always #5 clk=~clk` | Oscillator       |
+| `rst=1`              | Reset line       |
+| `@(posedge clk)`     | Flip-flop sample |
+| `sin=1`              | Serial input     |
+| `count`              | Register output  |
 
 ---
 
- 16. Why This is Important
+## 16. Why This is Important
 
 If you can write testbenches for:
 ✔ D Flip-Flop
@@ -399,8 +384,9 @@ If you can write testbenches for:
 
 You can test:
 
- FSMs
- FIFOs
- UARTs
- Pipelines
+* FSMs
+* FIFOs
+* UARTs
+* Pipelines
 
+---
