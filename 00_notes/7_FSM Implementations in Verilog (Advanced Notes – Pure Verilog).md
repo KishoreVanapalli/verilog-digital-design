@@ -1,21 +1,21 @@
-FSM Implementations in Verilog (Advanced Notes – Pure Verilog)
+# 🧠 FSM Implementations in Verilog (Advanced Notes – Pure Verilog)
 
 ---
 
- 1. FSM with Counter
+## 1. FSM with Counter
 
- Concept
+### Concept
 
 An FSM with a counter is used when:
 
- A state must last for a fixed number of clock cycles
- Timing control is required
+* A state must last for a fixed number of clock cycles
+* Timing control is required
 
-Example: stay in a state for 10 clocks, then go to DONE.
+**Example:** Stay in a state for 10 clocks, then go to `DONE`.
 
 ---
 
- FSM that counts 0 to 9 then goes to DONE (Pure Verilog)
+### FSM that counts 0 to 9 then goes to `DONE` (Pure Verilog)
 
 ```verilog
 module fsm_with_counter (
@@ -73,25 +73,25 @@ endmodule
 
 ---
 
- 2. FSM with Shift Register
+## 2. FSM with Shift Register
 
- Concept
+### Concept
 
 FSM controls when data should:
 
- Load
- Shift
- Stop
+* Load
+* Shift
+* Stop
 
 Used in:
 
- Serial communication
- Data framing
- Encryption
+* Serial communication
+* Data framing
+* Encryption
 
 ---
 
- FSM controlling a 4-bit left shift register (Pure Verilog)
+### FSM controlling a 4-bit left shift register (Pure Verilog)
 
 ```verilog
 module fsm_shift_reg (
@@ -146,17 +146,17 @@ FSM controls when to load and when to shift.
 
 ---
 
- 3. FSM with Serial Input (Sequence Detector)
+## 3. FSM with Serial Input (Sequence Detector)
 
- Concept
+### Concept
 
 FSM reads input bit-by-bit and detects a pattern.
 
-Example: detect 1011
+**Example:** Detect `1011`
 
 ---
 
- Moore FSM: Serial 1011 Detector (Pure Verilog)
+### Moore FSM – Serial `1011` Detector (Pure Verilog)
 
 ```verilog
 module fsm_serial (
@@ -204,24 +204,24 @@ endmodule
 
 ✔ Serial input
 ✔ FSM detects pattern
-✔ Used in UART, protocols
+✔ Used in UART and protocols
 
 ---
 
- 4. Testbench for FSMs (Pure Verilog)
+## 4. Testbench for FSMs (Pure Verilog)
 
- Purpose
+### Purpose
 
-Testbench should:
+A testbench should:
 
- Generate clock
- Apply reset
- Drive inputs
- Observe outputs
+* Generate clock
+* Apply reset
+* Drive inputs
+* Observe outputs
 
 ---
 
- Universal FSM Testbench Template
+### Universal FSM Testbench Template
 
 ```verilog
 module fsm_tb;
@@ -273,7 +273,7 @@ endmodule
 
 ---
 
- Summary
+## Summary
 
 | FSM Type             | Purpose                |
 | -------------------- | ---------------------- |
@@ -282,11 +282,11 @@ endmodule
 | FSM + Serial Input   | Pattern detection      |
 | FSM + Testbench      | Verification           |
 
-FSM + Datapath = Complete digital system
+**FSM + Datapath = Complete digital system**
 
 ---
 
- Design Rules (Important)
+## Design Rules (Important)
 
 ✔ Two-always block FSM
 ✔ Non-blocking (`<=`) in sequential logic
@@ -295,4 +295,4 @@ FSM + Datapath = Complete digital system
 ✔ Always define default state
 ✔ Always simulate
 
-
+---
