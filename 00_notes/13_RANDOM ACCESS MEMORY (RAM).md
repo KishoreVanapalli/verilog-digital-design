@@ -1,31 +1,31 @@
-RANDOM ACCESS MEMORY (RAM)
+# Random Access Memory (RAM)
 
 ---
 
- 1. What is RAM?
+## 1. What is RAM?
 
-RAM (Random Access Memory) is a storage block used to store data temporarily while a system operates.
+**RAM (Random Access Memory)** is a storage block used to store data temporarily while a system operates.
 
 It allows:
 
- Read data
- Write data
- Access any location directly (random access)
+* Read data
+* Write data
+* Access any location directly (**random access**)
 
 ---
 
- 2. RAM Structure
+## 2. RAM Structure
 
 RAM consists of:
 
- Memory cells
- Address decoder
- Data input/output
- Control signals
+* Memory cells
+* Address decoder
+* Data input/output
+* Control signals
 
-Conceptually:
+Conceptual view:
 
-```text
+```text id="ramstruct"
 Address → Memory Array → Data Out
            ↑
         Write Enable
@@ -33,73 +33,76 @@ Address → Memory Array → Data Out
 
 ---
 
- 3. RAM Organization
+## 3. RAM Organization
 
 RAM is described as:
 
-```text
+```text id="ramorg"
 Depth × Width
 ```
 
 Example:
 
- 256 × 8 RAM
-  = 256 locations
-  = each location is 8 bits
+* **256 × 8 RAM**
+
+  * 256 locations
+  * each location is 8 bits
 
 Address bits = log₂(depth)
 
+```text id="addrbits"
 256 locations → 8 address bits
+```
 
 ---
 
- 4. RAM Signals
+## 4. RAM Signals
 
-RAM typically has:
+Typical RAM interface:
 
- Address bus
- Data input bus
- Data output bus
- Write enable
- Clock (for synchronous RAM)
+* Address bus
+* Data input bus
+* Data output bus
+* Write enable
+* Clock (for synchronous RAM)
 
 ---
 
- 5. RAM Operations
+## 5. RAM Operations
 
- Write Operation:
+### Write Operation
 
- Occurs on clock edge
- Data is stored at given address
- Requires write enable
+* Occurs on clock edge
+* Data stored at given address
+* Requires write enable
 
- Read Operation:
+### Read Operation
 
 Two types:
 
-1. Asynchronous read (output follows address)
-2. Synchronous read (output updates on clock)
+1. **Asynchronous read** – output follows address
+2. **Synchronous read** – output updates on clock
 
 ---
 
- 6. Nature of RAM (Sequential)
+## 6. Nature of RAM (Sequential)
 
 RAM is:
 
- Sequential logic
- Has memory
- Uses clock for writing
- Stores previous values
+* Sequential logic
+* Has memory
+* Uses clock for writing
+* Stores previous values
 
-Mathematically:
+Mathematical form:
 
-```text
+```text id="rammath"
 Memory_next = f(Memory_current, data, address, control)
 ```
 
 ---
 
- 7. RAM vs Register
+## 7. RAM vs Register
 
 | Feature | Register    | RAM          |
 | ------- | ----------- | ------------ |
@@ -110,31 +113,35 @@ Memory_next = f(Memory_current, data, address, control)
 
 ---
 
- 8. Address Decoding
+## 8. Address Decoding
 
 In hardware:
 
- Decoder selects one row from memory
- Verilog does this using index:
-  `memory[address]`
+* Decoder selects one row from memory
 
-This hides physical decoding logic.
+In Verilog:
+
+```verilog
+memory[address]
+```
+
+This hides the physical decoding logic.
 
 ---
 
- 9. RAM in Digital Systems
+## 9. RAM in Digital Systems
 
 RAM is used for:
 
- Program storage
- Data storage
- Buffers
- FIFOs
- Lookup tables
+* Program storage
+* Data storage
+* Buffers
+* FIFOs
+* Lookup tables
 
 ---
 
- ⚖️ ALU vs RAM (Conceptual Difference)
+## ⚖️ ALU vs RAM (Conceptual Difference)
 
 | Feature  | ALU           | RAM            |
 | -------- | ------------- | -------------- |
@@ -146,11 +153,11 @@ RAM is used for:
 
 ---
 
- 🧠 ALU + RAM Together
+## 🧠 ALU + RAM Together
 
 In a real system:
 
-```text
+```text id="aluram"
 RAM → ALU → RAM
 ```
 
@@ -162,19 +169,31 @@ Process:
 
 This requires:
 
- Clock
- Registers
- FSM controller
+* Clock
+* Registers
+* FSM controller
 
 ---
 
- 🚨 Important Concept: Feedback Loop
+## 🚨 Important Concept: Feedback Loop
 
-If ALU output is directly connected back to RAM without clock:
-→ Unstable
-→ Oscillation
-→ Invalid hardware
+If ALU output is directly connected back to RAM **without a clock**:
+
+* ❌ Unstable
+* ❌ Oscillation
+* ❌ Invalid hardware
 
 So:
-RAM breaks feedback using clock
+**RAM breaks feedback using a clock.**
 
+---
+
+### Bottom Line
+
+ALU computes.
+RAM remembers.
+
+Without RAM → no state.
+Without ALU → no processing.
+
+---
