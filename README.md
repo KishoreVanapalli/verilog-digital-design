@@ -94,7 +94,8 @@ This repository is built to:
 
 * **Kishore Vanapalli** 
 * *Diploma & B.Tech (ECE)* 
-* **Aspiring RTL / Digital Design Engineer** 
+* **Aspiring RTL / Digital Design Engineer**
+* LinkedIn: [kishorevanapalli5258](https://www.linkedin.com/in/kishorevanapalli5258/)
 * 📧 [kishorevanapalli2@gmail.com](mailto:kishorevanapalli2@gmail.com)
 * 📞 9494525837
 
