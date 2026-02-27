@@ -1,57 +1,56 @@
-Study Notes Sequential Circuits in Verilog Using `always` Block
+# 🔄 Sequential Circuits in Verilog using `always` Block
 
-Topics Covered
-• D Flip-Flop
-• Reset
-• Counter
-• Shift Register
+**Topics Covered:**
+* D Flip-Flop
+* Reset
+* Counter
+* Shift Register
 
-Purpose
+**Purpose:**
 To understand how clocked `always` blocks model real hardware storage elements such as registers, counters, and shift registers.
 
 ---
 
- 1. Sequential Logic Overview
+## 1. Sequential Logic Overview
 
-Sequential logic differs from combinational logic because
+Sequential logic differs from combinational logic because:
 
- It has memory
- Output depends on current input + previous state
- Controlled by a clock signal
+* It has **memory**
+* Output depends on **current input + previous state**
+* Controlled by a **clock signal**
 
-Implemented using
+Implemented using:
 
- Flip-flops
- Registers
- Feedback logic
+* Flip-flops
+* Registers
+* Feedback logic
 
-In Verilog, sequential logic is modeled using
+In Verilog, sequential logic is modeled using:
 
 ```verilog
 always @(posedge clk)
 ```
 
-This tells the synthesis tool to infer edge-triggered flip-flops.
+This tells the synthesis tool to infer **edge-triggered flip-flops**.
 
 ---
 
- 2. D Flip-Flop
+## 2. D Flip-Flop (DFF)
 
- Definition
+### Definition
 
-A D Flip-Flop (Data Flip-Flop) stores one bit of data.
-On each active clock edge
-
- Output `q` takes the value of input `d`
-
- Behavior
+A D Flip-Flop stores **1 bit of data**.
+On every active clock edge:
 
 ```
-At clock edge → q = d
-Between clocks → q holds value
+q ← d
 ```
 
- Verilog Code
+Between clock edges, `q` holds its value.
+
+---
+
+### Verilog Code
 
 ```verilog
 module dff(
@@ -61,115 +60,119 @@ module dff(
 );
 
 always @(posedge clk) begin
-    q = d;
+    q <= d;
 end
 
 endmodule
 ```
 
- Hardware Inferred
+---
 
- One D flip-flop
- Triggered on rising edge
- Memory element
+### Hardware Inferred
 
- Important Rule
-
-Use non-blocking (`=`) for flip-flops.
+* One D flip-flop
+* Rising-edge triggered
+* Memory element
 
 ---
 
- 3. Reset in Sequential Circuits
+### Important Rule
 
-Reset forces the flip-flop or register into a known state (usually 0).
-
- Why Reset is Required
-
- Avoid unknown (`X`) states
- Initialize hardware
- Ensure predictable startup
+✔ Always use **non-blocking (`<=`)** for flip-flops.
 
 ---
 
- 3.1 Asynchronous Reset
+## 3. Reset in Sequential Circuits
 
-Reset acts immediately, independent of clock.
+Reset forces registers into a known state (usually 0).
+
+### Why Reset is Needed
+
+* Avoids `X` (unknown) states
+* Initializes hardware
+* Ensures predictable startup
+
+---
+
+### 3.1 Asynchronous Reset
+
+Reset acts immediately (independent of clock).
 
 ```verilog
 always @(posedge clk or posedge rst) begin
     if (rst)
-        q = 1'b0;
+        q <= 1'b0;
     else
-        q = d;
+        q <= d;
 end
 ```
 
- Hardware
+**Hardware:**
 
- Flip-flop with async clear pin
+* Flip-flop with async clear pin
 
- Characteristics
+**Characteristics:**
 
- Fast response
- Used for power-on reset
- Can cause timing issues if not synchronized
+* Fast response
+* Used for power-on reset
+* Can cause timing issues if not synchronized
 
 ---
 
- 3.2 Synchronous Reset
+### 3.2 Synchronous Reset
 
-Reset only works on clock edge.
+Reset works only on clock edge.
 
 ```verilog
 always @(posedge clk) begin
     if (rst)
-        q = 1'b0;
+        q <= 1'b0;
     else
-        q = d;
+        q <= d;
 end
 ```
 
- Hardware
+**Hardware:**
 
- Reset logic in data path
- More timing-safe
+* Reset logic inside data path
+* More timing-safe
 
 ---
 
- 4. Counter
+## 4. Counter
 
- Definition
+### Definition
 
 A counter is a register that increments or decrements on each clock edge.
 
 ---
 
- 4.1 4-Bit Up Counter
+### 4.1 4-Bit Up Counter
 
 ```verilog
 module up_counter(
     input clk,
     input rst,
-    output reg [30] count
+    output reg [3:0] count
 );
 
 always @(posedge clk) begin
     if (rst)
-        count = 4'b0000;
+        count <= 4'b0000;
     else
-        count = count + 1;
+        count <= count + 1;
 end
 
 endmodule
 ```
 
- Hardware
+**Hardware:**
 
- 4 flip-flops
- Adder logic
- Feedback path
+* 4 flip-flops
+* Adder logic
+* Feedback path
 
-Sequence
+**Sequence:**
 
 ```
 0000 → 0001 → 0010 → ... → 1111 → 0000
@@ -177,69 +180,69 @@ Sequence
 
 ---
 
- 4.2 Down Counter
+### 4.2 Down Counter
 
 ```verilog
 always @(posedge clk) begin
     if (rst)
-        count = 4'b1111;
+        count <= 4'b1111;
     else
-        count = count - 1;
+        count <= count - 1;
 end
 ```
 
 ---
 
- 4.3 Enable Controlled Counter
+### 4.3 Enable-Controlled Counter
 
 ```verilog
 always @(posedge clk) begin
     if (rst)
-        count = 0;
+        count <= 0;
     else if (en)
-        count = count + 1;
+        count <= count + 1;
     else
-        count = count;
+        count <= count;
 end
 ```
 
- Hardware
+**Hardware:**
 
- Multiplexer before flip-flops
- Holds value when disabled
+* Multiplexer before flip-flops
+* Holds value when disabled
 
 ---
 
- 4.4 MOD-N Counter (MOD-10 Example)
+### 4.4 MOD-N Counter (MOD-10 Example)
 
 ```verilog
 always @(posedge clk) begin
     if (rst)
-        count = 0;
+        count <= 0;
     else if (count == 9)
-        count = 0;
+        count <= 0;
     else
-        count = count + 1;
+        count <= count + 1;
 end
 ```
 
 ---
 
- 5. Shift Register
+## 5. Shift Register
 
- Definition
+### Definition
 
 A shift register moves data left or right by one bit on each clock edge.
 
-Used in
+Used in:
 
- Serial-to-parallel conversion
- Data buffering
- Communication systems
+* Serial-to-parallel conversion
+* Data buffering
+* Communication systems
 
 ---
 
- 5.1 Right Shift Register (4-bit)
+### 5.1 Right Shift Register (4-bit)
 
 ```verilog
 module shift_right(
@@ -251,39 +254,39 @@ module shift_right(
 
 always @(posedge clk) begin
     if (rst)
-        q = 4'b0000;
+        q <= 4'b0000;
     else
-        q = {sin, q[3:1]};
+        q <= {sin, q[3:1]};
 end
 
 endmodule
 ```
 
- Operation
+**Operation:**
 
 ```
-q[3] ← sin
-q[2] ← q[3]
-q[1] ← q[2]
-q[0] ← q[1]
+q[3] ← sin  
+q[2] ← q[3]  
+q[1] ← q[2]  
+q[0] ← q[1]  
 ```
 
 ---
 
- 5.2 Left Shift Register
+### 5.2 Left Shift Register
 
 ```verilog
 always @(posedge clk) begin
     if (rst)
-        q = 0;
+        q <= 0;
     else
-        q = {q[2:0], sin};
+        q <= {q[2:0], sin};
 end
 ```
 
 ---
 
- 5.3 Parallel Load Shift Register
+### 5.3 Parallel Load Shift Register
 
 ```verilog
 module shift_load(
@@ -296,55 +299,57 @@ module shift_load(
 
 always @(posedge clk) begin
     if (rst)
-        q = 0;
+        q <= 0;
     else if (load)
-        q = data;
+        q <= data;
     else
-        q = {q[2:0], 1'b0};
+        q <= {q[2:0], 1'b0};
 end
 
 endmodule
 ```
 
- Hardware
+**Hardware:**
 
- Multiplexer selects between load and shift
- Flip-flops store data
+* Multiplexer selects load or shift
+* Flip-flops store data
 
 ---
 
- 6. Common Rules for All Sequential Circuits
+## 6. Common Rules for Sequential Circuits
 
 1. Use `always @(posedge clk)`
-2. Use non-blocking (`=`)
-3. Handle reset
+2. Use non-blocking (`<=`)
+3. Always handle reset
 4. One register group per always block
-5. No `delay` in RTL
+5. No delays (`#`) in RTL
 6. No blocking assignment in clocked logic
 
 ---
 
- 7. Hardware Mapping Summary
+## 7. Hardware Mapping Summary
 
- Code                  Hardware        
- --------------------  --------------- 
- `q = d`              D Flip-Flop     
- `if (rst)`            Reset control   
- `count = count + 1`  Counter         
- `{q[2:0], sin}`       Shift register  
- `=`                  Register update 
- `posedge clk`         Clocked storage 
+| Code Pattern         | Hardware        |
+| -------------------- | --------------- |
+| `q <= d`             | D Flip-Flop     |
+| `if (rst)`           | Reset control   |
+| `count <= count + 1` | Counter         |
+| `{q[2:0], sin}`      | Shift register  |
+| `<=`                 | Register update |
+| `posedge clk`        | Clocked storage |
 
 ---
 
- 8. Importance of These Blocks
+## 8. Importance of These Blocks
 
-These four blocks form
+These structures form the basis of:
 
- Registers
- Timers
- FSMs
- Pipelines
- FIFOs
- UARTs
- Memory controllers
+* Registers
+* Timers
+* FSMs
+* Pipelines
+* FIFOs
+* UARTs
+* Memory controllers
+
+---
