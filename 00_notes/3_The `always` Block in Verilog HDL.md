@@ -293,12 +293,3 @@ Hardware:
 * Foundation for SystemVerilog & UVM
 
 ---
-
-✅ This README is:
-
-* Recruiter-readable
-* Interview useful
-* PD/RTL aligned
-* GitHub ready
-
----
