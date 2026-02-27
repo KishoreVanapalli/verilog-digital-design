@@ -1,6 +1,15 @@
-UART – HARDWARE IMPLEMENTATION FOR RECEIVER (FSM BASED)
+# UART Receiver – Hardware Implementation (FSM Based)
 
- 1. UART Receiver Blocks
+This document explains the hardware design of a **UART Receiver** using:
+
+* Finite State Machine (FSM)
+* Baud rate counter
+* Shift register
+  Implemented in **pure Verilog (no SystemVerilog)**.
+
+---
+
+## 1. UART Receiver Block Diagram
 
 ```
 RX pin → FSM → Shift Register → Data Register
@@ -8,26 +17,26 @@ RX pin → FSM → Shift Register → Data Register
          Baud Counter
 ```
 
-Blocks:
+### Blocks
 
- FSM (controls states)
- Counter (baud timing)
- Shift register (stores bits)
+* **FSM** – Controls the receive process
+* **Counter** – Generates baud timing
+* **Shift Register** – Stores incoming serial bits
 
 ---
 
- 2. UART RX FSM States
+## 2. UART RX FSM States
 
 | State | Function               |
 | ----- | ---------------------- |
 | IDLE  | Wait for start bit     |
 | START | Align to middle of bit |
-| DATA  | Receive 8 bits         |
+| DATA  | Receive 8 data bits    |
 | STOP  | Check stop bit         |
 
 ---
 
- 3. UART Receiver FSM (Verilog – no SystemVerilog)
+## 3. UART Receiver FSM (Verilog)
 
 ```verilog
 module uart_rx (
@@ -41,7 +50,10 @@ module uart_rx (
     reg [3:0] bit_cnt;
     reg [7:0] shift_reg;
 
-    parameter IDLE=2'b00, START=2'b01, DATA=2'b10, STOP=2'b11;
+    parameter IDLE  = 2'b00,
+              START = 2'b01,
+              DATA  = 2'b10,
+              STOP  = 2'b11;
 
     always @(posedge clk or posedge rst) begin
         if (rst) begin
@@ -50,6 +62,7 @@ module uart_rx (
             data_ready <= 0;
         end else begin
             case(state)
+
                 IDLE: begin
                     data_ready <= 0;
                     if (!rx)
@@ -73,6 +86,7 @@ module uart_rx (
                     data_ready <= 1;
                     state <= IDLE;
                 end
+
             endcase
         end
     end
@@ -81,17 +95,24 @@ endmodule
 
 ---
 
- 4. Baud Rate Generator
+## 4. Baud Rate Generator
 
-Formula:
+### Formula
 
-Divider = Clock / Baud
+```
+Divider = Clock Frequency / Baud Rate
+```
 
-Example:
+### Example
+
+```
 Clock = 50 MHz
-Baud = 9600
+Baud  = 9600
 
 Divider ≈ 5208
+```
+
+### Verilog Implementation
 
 ```verilog
 module baud_gen(
@@ -115,7 +136,7 @@ endmodule
 
 ---
 
- 5. UART Testbench (Basic)
+## 5. UART Testbench (Basic)
 
 ```verilog
 module uart_tb;
@@ -125,47 +146,56 @@ module uart_tb;
 
     uart_rx dut(clk, rst, rx, data_out, data_ready);
 
-    always 5 clk = ~clk;
+    always #5 clk = ~clk;
 
     initial begin
         clk=0; rst=1; rx=1;
-        20 rst=0;
+        #20 rst=0;
 
-        // Send start bit
-        rx=0; 100;
+        // Start bit
+        rx=0; #100;
+
         // Send 10101010 (LSB first)
-        rx=0; 100;
-        rx=1; 100;
-        rx=0; 100;
-        rx=1; 100;
-        rx=0; 100;
-        rx=1; 100;
-        rx=0; 100;
-        rx=1; 100;
-        // Stop bit
-        rx=1; 100;
+        rx=0; #100;
+        rx=1; #100;
+        rx=0; #100;
+        rx=1; #100;
+        rx=0; #100;
+        rx=1; #100;
+        rx=0; #100;
+        rx=1; #100;
 
-        200 $finish;
+        // Stop bit
+        rx=1; #100;
+
+        #200 $finish;
     end
 endmodule
 ```
 
 ---
 
- 6. Design Rule (Very Important)
+## 6. Design Rule (Critical)
 
-✔ FSM = control
-✔ Shift register = data
-✔ Counter = timing
-✔ UART = FSM + Counter + Shift register
+* ✔ FSM = **Control**
+* ✔ Shift Register = **Data path**
+* ✔ Counter = **Timing**
+* ✔ UART = **FSM + Counter + Shift Register**
 
 ---
 
- Bottom Line (No sugarcoating)
+## Bottom Line (No Sugarcoating)
 
-If you know only:
+If you only know:
 
-> start bit, stop bit
+> “Start bit” and “Stop bit”
 
-→ You know theory
+→ You know **UART theory only**
 
+If you can design:
+
+> FSM + counter + shift register
+
+→ You know **UART hardware**
+
+---
