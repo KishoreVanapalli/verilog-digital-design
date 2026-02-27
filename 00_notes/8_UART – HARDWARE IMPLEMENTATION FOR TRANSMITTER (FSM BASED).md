@@ -1,8 +1,8 @@
-UART – HARDWARE IMPLEMENTATION FOR TRANSMITTER (FSM BASED)
+# 📡 UART Transmitter – Hardware Implementation (FSM Based)
 
 ---
 
- 1. UART Transmitter Blocks
+## 1. UART Transmitter Blocks
 
 ```
 Data Register → Shift Register → TX pin
@@ -12,15 +12,15 @@ Data Register → Shift Register → TX pin
                Baud Counter
 ```
 
-Blocks:
+### Functional Blocks
 
-FSM → controls transmission sequence
-Counter → provides baud timing
-Shift register → shifts data bits out serially
+* **FSM** → Controls the transmission sequence
+* **Counter** → Provides baud timing
+* **Shift Register** → Shifts data bits out serially
 
 ---
 
- 2. UART TX FSM States
+## 2. UART TX FSM States
 
 | State | Function             |
 | ----- | -------------------- |
@@ -31,7 +31,7 @@ Shift register → shifts data bits out serially
 
 ---
 
- 3. UART Transmitter FSM (Verilog – no SystemVerilog)
+## 3. UART Transmitter FSM (Pure Verilog)
 
 ```verilog
 module uart_tx (
@@ -92,17 +92,24 @@ endmodule
 
 ---
 
- 4. Baud Rate Generator (Transmitter)
+## 4. Baud Rate Generator (Transmitter)
 
-Formula:
+### Formula
 
-Divider = Clock / Baud
+```
+Divider = Clock Frequency / Baud Rate
+```
 
-Example:
-Clock = 50 MHz
-Baud = 9600
+### Example
 
-Divider ≈ 5208
+* Clock = 50 MHz
+* Baud = 9600
+
+```
+Divider ≈ 50,000,000 / 9600 ≈ 5208
+```
+
+### Baud Generator (Verilog)
 
 ```verilog
 module baud_gen(
@@ -124,11 +131,12 @@ module baud_gen(
 endmodule
 ```
 
-FSM advances only on tick (baud timing).
+✔ FSM advances only on `tick`
+✔ Tick defines baud timing
 
 ---
 
- 5. UART Transmitter Testbench (Basic)
+## 5. UART Transmitter Testbench (Basic)
 
 ```verilog
 module uart_tx_tb;
@@ -157,26 +165,35 @@ endmodule
 
 ---
 
- 6. Design Rule (Very Important)
+## 6. Design Rule (Very Important)
 
-✔ FSM → controls sequence
-✔ Shift register → outputs bits
-✔ Counter → controls timing
-✔ UART TX = FSM + Counter + Shift register
+✔ FSM → Controls sequence
+✔ Shift register → Outputs bits
+✔ Counter → Controls timing
+
+**UART TX = FSM + Counter + Shift Register**
 
 ---
 
- Hardware Meaning
+## Hardware Meaning of Each State
 
- IDLE → TX = 1
- START → TX = 0
- DATA → TX = each bit
- STOP → TX = 1
+| State | TX Line   |
+| ----- | --------- |
+| IDLE  | 1         |
+| START | 0         |
+| DATA  | Data bits |
+| STOP  | 1         |
 
-Transmission format:
+---
+
+## Transmission Format
 
 ```
 1 (idle) → 0 (start) → b0 b1 b2 b3 b4 b5 b6 b7 → 1 (stop)
 ```
 
-LSB sent first.
+✔ LSB sent first
+✔ Asynchronous serial format
+✔ 1 start bit, 8 data bits, 1 stop bit
+
+---
