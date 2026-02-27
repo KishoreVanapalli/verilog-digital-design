@@ -1,18 +1,18 @@
-Study Notes: The `always` Block in Verilog HDL
+# 🔁 The `always` Block in Verilog HDL
 
-Topic: Procedural Modeling of Hardware
-Level: RTL / Industry Foundation
-Purpose: To understand how Verilog `always` blocks map to real hardware
+* **Topic:** Procedural Modeling of Hardware
+* **Level:** RTL / Industry Foundation
+* **Purpose:** Understand how Verilog `always` blocks map to real hardware
 
 ---
 
- 1. Introduction to the `always` Block
+## 1. Introduction to the `always` Block
 
-The `always` block is a procedural block in Verilog used to describe hardware behavior that depends on events such as signal changes or clock edges.
+The `always` block is a **procedural block** in Verilog used to describe hardware behavior based on events such as signal changes or clock edges.
 
-Unlike continuous assignments (`assign`), which are always active, an `always` block executes only when an event in its sensitivity list occurs.
+Unlike continuous assignments (`assign`), which are always active, an `always` block executes **only when an event in its sensitivity list occurs**.
 
-General syntax:
+### General Syntax
 
 ```verilog
 always @(sensitivity_list) begin
@@ -20,30 +20,30 @@ always @(sensitivity_list) begin
 end
 ```
 
-The sensitivity list defines when the block is triggered.
+The sensitivity list defines **when** the block is triggered.
 
 ---
 
- 2. Types of Hardware Modeled Using `always`
+## 2. Types of Hardware Modeled Using `always`
 
-The `always` block can model two major categories of hardware:
+The `always` block can model:
 
-1. Combinational Logic
-2. Sequential Logic (Flip-Flops / Registers)
+1. **Combinational Logic**
+2. **Sequential Logic (Flip-Flops / Registers)**
 
-The type of hardware inferred depends entirely on:
+The inferred hardware depends on:
 
- Sensitivity list
- Assignment type (`=` or `<=`)
- Coding style
+* Sensitivity list
+* Assignment type (`=` or `<=`)
+* Coding style
 
 ---
 
- 3. Sequential Logic Using `always`
+## 3. Sequential Logic Using `always`
 
 Sequential logic stores state and changes only on clock edges.
 
- Syntax for Flip-Flop Modeling:
+### Flip-Flop Modeling
 
 ```verilog
 always @(posedge clk) begin
@@ -51,92 +51,88 @@ always @(posedge clk) begin
 end
 ```
 
- Hardware Inference:
+### Hardware Inference
 
- A D flip-flop is inferred
- Triggered on rising edge of clock
- `q` holds its value between clock edges
+* D flip-flop
+* Triggered on rising edge
+* `q` holds value between edges
 
- Key Points:
+### Key Points
 
- Must use edge-based sensitivity list (`posedge` or `negedge`)
- Must use non-blocking assignment (`<=`)
- Represents memory (register)
+* Must use `posedge` or `negedge`
+* Must use **non-blocking (`<=`)**
+* Represents memory
 
 ---
 
- 4. Combinational Logic Using `always`
+## 4. Combinational Logic Using `always`
 
-Combinational logic output depends only on current inputs.
-
- Syntax:
+Combinational logic depends only on current inputs.
 
 ```verilog
-always @() begin
+always @(*) begin
     y = (a & b) | c;
 end
 ```
 
- Hardware Inference:
+### Hardware Inference
 
- Logic gates (AND, OR, etc.)
- No memory elements
+* Logic gates (AND, OR, etc.)
+* No memory
 
- Key Points:
+### Key Points
 
- Use `always @(*)` or list all inputs manually
- Use blocking assignment (`=`)
- Output must be assigned in all paths
+* Use `always @(*)`
+* Use blocking (`=`)
+* Assign output in **all paths**
 
 ---
 
- 5. Sensitivity List
+## 5. Sensitivity List
 
-The sensitivity list defines the signals that trigger execution.
+Defines when the block runs.
 
- Types:
+### Types
 
-1. Edge-based
+**Edge-based**
 
 ```verilog
 always @(posedge clk)
 ```
 
-2. Level-based
+**Level-based**
 
 ```verilog
 always @(a or b or c)
 ```
 
-3. Wildcard
+**Wildcard**
 
 ```verilog
 always @(*)
 ```
 
- Importance:
+### Importance
 
- Missing signals cause simulation mismatch
- Incorrect sensitivity causes unintended latches or stale outputs
-
----
-
- 6. Blocking vs Non-Blocking Assignments
-
-| Feature         | Blocking (`=`)      | Non-Blocking (`<=`) |
-| --------------- | ------------------- | ------------------- |
-| Execution order | Sequential          | Parallel            |
-| Update time     | Immediate           | End of timestep     |
-| Typical use     | Combinational logic | Sequential logic    |
-| Hardware type   | Logic gates         | Flip-flops          |
+* Missing signals → simulation mismatch
+* Wrong sensitivity → latches or stale outputs
 
 ---
 
- 7. Why Non-Blocking is Required for Sequential Logic
+## 6. Blocking vs Non-Blocking
 
-Consider two registers in a shift structure.
+| Feature     | Blocking (`=`) | Non-Blocking (`<=`) |
+| ----------- | -------------- | ------------------- |
+| Execution   | Sequential     | Parallel            |
+| Update      | Immediate      | End of timestep     |
+| Typical use | Combinational  | Sequential          |
+| Hardware    | Gates          | Flip-flops          |
 
- Correct (Non-Blocking):
+---
+
+## 7. Why Non-Blocking for Sequential Logic
+
+### Correct
 
 ```verilog
 always @(posedge clk) begin
@@ -145,15 +141,13 @@ always @(posedge clk) begin
 end
 ```
 
- Hardware:
-
- Two flip-flops
- Both sample old values at clock edge
- Values update simultaneously
+✔ Two flip-flops
+✔ Sample old values
+✔ Update together
 
 ---
 
- Incorrect (Blocking):
+### Incorrect
 
 ```verilog
 always @(posedge clk) begin
@@ -162,24 +156,17 @@ always @(posedge clk) begin
 end
 ```
 
- Effect:
-
- `q2` uses new `q1` immediately
- Synthesis collapses logic
- Second flip-flop is removed
- Hardware behavior is wrong
-
-This causes race-through, which cannot exist physically.
+❌ Race-through
+❌ Second FF removed
+❌ Hardware behavior wrong
 
 ---
 
- 8. Latch Inference in `always`
+## 8. Latch Inference
 
-A latch is inferred when:
+A latch is inferred when output is **not assigned in all paths**.
 
- Output is not assigned in all execution paths
-
- Example (Bad):
+### Bad
 
 ```verilog
 always @(*) begin
@@ -188,14 +175,11 @@ always @(*) begin
 end
 ```
 
- Hardware:
-
- Level-sensitive latch inferred
- `y` holds old value when `sel = 0`
+→ Latch inferred
 
 ---
 
- Correct:
+### Correct
 
 ```verilog
 always @(*) begin
@@ -209,7 +193,7 @@ end
 or
 
 ```verilog
-always @() begin
+always @(*) begin
     y = b;
     if (sel)
         y = a;
@@ -218,7 +202,7 @@ end
 
 ---
 
- 9. Modeling a Multiplexer Using `always`
+## 9. Multiplexer Example
 
 ```verilog
 always @(*) begin
@@ -232,19 +216,13 @@ always @(*) begin
 end
 ```
 
- Hardware:
-
- 4-to-1 multiplexer
- No memory
- Pure combinational logic
-
-Default case prevents latch creation.
+✔ 4:1 MUX
+✔ No memory
+✔ Default avoids latch
 
 ---
 
- 10. Clock + Reset in `always`
-
-Sequential logic with reset:
+## 10. Clock + Reset
 
 ```verilog
 always @(posedge clk or posedge rst) begin
@@ -255,61 +233,72 @@ always @(posedge clk or posedge rst) begin
 end
 ```
 
- Hardware:
+Hardware:
 
- D flip-flop with asynchronous reset
-
----
-
- 11. `always` vs `assign`
-
-| Feature    | always                          | assign            |
-| ---------- | ------------------------------- | ----------------- |
-| Style      | Procedural                      | Continuous        |
-| Timing     | Event-based                     | Always active     |
-| Complexity | Can contain if/case/loops       | Expression only   |
-| Used for   | Sequential & complex comb logic | Simple comb logic |
+* Flip-flop with **async reset**
 
 ---
 
- 12. Common Coding Errors
+## 11. `always` vs `assign`
 
-1. Using blocking (`=`) in clocked logic
+| Feature    | always             | assign          |
+| ---------- | ------------------ | --------------- |
+| Style      | Procedural         | Continuous      |
+| Timing     | Event-based        | Always active   |
+| Complexity | if/case/loops      | Expression only |
+| Used for   | Seq & complex comb | Simple comb     |
+
+---
+
+## 12. Common Coding Errors
+
+1. Blocking (`=`) in clocked logic
 2. Missing signals in sensitivity list
-3. Not assigning outputs in all paths
+3. Output not assigned in all paths
 4. Mixing `=` and `<=` randomly
-5. Creating unintended latches
-6. Using delays (``) in `always` for RTL
+5. Unintended latches
+6. Using `#` delays in RTL
 
 ---
 
- 13. Best Practices
+## 13. Best Practices
 
-1. Use `always @(posedge clk)` for registers
-2. Use `always @()` for combinational logic
-3. Use `<=` for sequential logic
-4. Use `=` for combinational logic
-5. Initialize or assign outputs in all paths
-6. Separate combinational and sequential blocks
-7. Never rely on simulation order
-
----
-
- 14. Hardware Interpretation Summary
-
-| Coding Style                   | Hardware Created |
-| ------------------------------ | ---------------- |
-| `always @(posedge clk)` + `<=` | Flip-flops       |
-| `always @(*)` + `=`            | Logic gates      |
-| Missing assignments            | Latches          |
-| Blocking in clocked logic      | Logic corruption |
+✔ `always @(posedge clk)` for registers
+✔ `always @(*)` for combinational
+✔ `<=` for sequential
+✔ `=` for combinational
+✔ Assign outputs in all paths
+✔ Separate comb & seq logic
+✔ Never rely on simulation order
 
 ---
 
- 15. Importance of the `always` Block
+## 14. Hardware Mapping Summary
 
- Core of RTL design
- Maps software-style code to real hardware
- Controls timing and storage
- Essential for FSMs, counters, pipelines
- Foundation for SystemVerilog and UVM
+| Coding Style                   | Hardware    |
+| ------------------------------ | ----------- |
+| `always @(posedge clk)` + `<=` | Flip-flops  |
+| `always @(*)` + `=`            | Logic gates |
+| Missing assignment             | Latches     |
+| Blocking in clocked            | Corruption  |
+
+---
+
+## 15. Importance of `always` Block
+
+* Core of RTL design
+* Maps code to hardware
+* Controls timing & storage
+* Used in FSMs, counters, pipelines
+* Foundation for SystemVerilog & UVM
+
+---
+
+✅ This README is:
+
+* Recruiter-readable
+* Interview useful
+* PD/RTL aligned
+* GitHub ready
+
+---
