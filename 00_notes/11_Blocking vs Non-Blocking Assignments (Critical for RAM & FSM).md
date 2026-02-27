@@ -1,23 +1,29 @@
-Blocking vs Non-Blocking Assignments (Critical for RAM & FSM)
+# Blocking vs Non-Blocking Assignments
+
+**(Critical for RAM & FSM Design)**
+
+This document explains the difference between **blocking (`=`)** and **non-blocking (`<=`)** assignments in Verilog and why using the wrong one breaks hardware.
 
 ---
 
- 1. Blocking Assignment (`=`)
+## 1. Blocking Assignment (`=`)
 
- Meaning
+### Meaning
 
-➡ Executes immediately, line by line
-➡ Next statement sees the new value
+* Executes **immediately**
+* Statements run **line by line**
+* Next line sees the **updated value**
 
- Used for:
+### Used For
 
-✔ Combinational logic
-✔ ALU
-✔ `always @()`
+* ✔ Combinational logic
+* ✔ ALU
+* ✔ MUX
+* ✔ `always @(*)`
 
 ---
 
- Example (Combinational)
+### Example (Combinational Logic)
 
 ```verilog
 always @(*) begin
@@ -26,7 +32,7 @@ always @(*) begin
 end
 ```
 
-Hardware meaning:
+### Hardware Meaning
 
 ```
 a,b → adder → c → adder → d
@@ -34,29 +40,29 @@ a,b → adder → c → adder → d
 
 Works correctly because:
 
- No clock
- No storage
- Pure logic
+* No clock
+* No storage
+* Pure logic
 
 ---
 
- 2. Non-Blocking Assignment (`<=`)
+## 2. Non-Blocking Assignment (`<=`)
 
- Meaning
+### Meaning
 
-➡ RHS is evaluated now
-➡ LHS is updated after the clock edge
+* RHS evaluated **now**
+* LHS updated **after clock edge**
 
- Used for:
+### Used For
 
-✔ Flip-flops
-✔ RAM write
-✔ FSM state
-✔ `always @(posedge clk)`
+* ✔ Flip-flops
+* ✔ RAM write
+* ✔ FSM state
+* ✔ `always @(posedge clk)`
 
 ---
 
- Example (Sequential)
+### Example (Sequential Logic)
 
 ```verilog
 always @(posedge clk) begin
@@ -65,14 +71,15 @@ always @(posedge clk) begin
 end
 ```
 
-Hardware meaning:
-Two flip-flops swap values on clock edge.
+### Hardware Meaning
+
+Two flip-flops swap values on the same clock edge.
 
 ---
 
- 3. What Goes Wrong If You Mix Them (Race Condition)
+## 3. What Goes Wrong If You Mix Them (Race Condition)
 
- ❌ Wrong (using blocking in sequential logic)
+### ❌ Wrong: Blocking in Sequential Logic
 
 ```verilog
 always @(posedge clk) begin
@@ -81,19 +88,20 @@ always @(posedge clk) begin
 end
 ```
 
-Simulation:
+### Simulation Behavior
 
- `a` updated first
- `b` gets NEW `a`
- Both become same value
+* `a` updated first
+* `b` reads new `a`
+* Both become equal
 
-Hardware:
-Synthesis removes one register
-Logic breaks
+### Hardware Result
+
+* One register optimized away
+* Design breaks
 
 ---
 
- 4. RAM Example (Correct)
+## 4. RAM Example (Correct)
 
 ```verilog
 always @(posedge clk) begin
@@ -103,12 +111,13 @@ end
 ```
 
 Why `<=`?
-Because RAM stores state
-Write must happen on clock edge
+
+* RAM stores state
+* Write must occur on clock edge
 
 ---
 
- 5. RAM Example (Wrong)
+## 5. RAM Example (Wrong)
 
 ```verilog
 always @(posedge clk) begin
@@ -116,14 +125,15 @@ always @(posedge clk) begin
 end
 ```
 
-Problems:
-❌ Race between write and read
-❌ Simulation ≠ hardware
-❌ Unstable behavior
+### Problems
+
+* ❌ Read/write race
+* ❌ Simulation ≠ hardware
+* ❌ Unstable behavior
 
 ---
 
- 6. ALU Example (Correct)
+## 6. ALU Example (Correct)
 
 ```verilog
 always @(*) begin
@@ -137,25 +147,27 @@ end
 ```
 
 Why `=`?
-Because:
-✔ No memory
-✔ No clock
-✔ Pure logic
+
+* No memory
+* No clock
+* Pure logic
 
 ---
 
- 7. Golden Rule (No Excuses)
+## 7. Golden Rule (No Exceptions)
 
 ```text
-always @(*)        → use =
-always @(posedge) → use <=
+always @(*)         → use =
+always @(posedge)  → use <=
 ```
+
+Break this rule → expect bugs.
 
 ---
 
- 8. ALU + RAM Feedback Loop (Your Conceptual Challenge)
+## 8. ALU + RAM Feedback Loop (Conceptual Trap)
 
-If you do:
+### Safe (Sequential)
 
 ```verilog
 always @(posedge clk) begin
@@ -163,32 +175,35 @@ always @(posedge clk) begin
 end
 ```
 
-This is safe because:
+Hardware sequence:
 
- Read happens
- ALU computes
- Write happens next edge
+* Read
+* ALU computes
+* Write on next edge
 
-But if you try combinational feedback:
+---
+
+### ❌ Unsafe (Combinational Feedback)
 
 ```verilog
 assign mem[addr] = mem[addr] + 1;
 ```
 
-That is:
+Hardware meaning:
 
 ```
 mem → adder → mem → adder → mem → ...
 ```
 
-That is:
-❌ Oscillation
-❌ Not synthesizable
-❌ Unstable hardware
+Result:
+
+* ❌ Oscillation
+* ❌ Not synthesizable
+* ❌ Unstable hardware
 
 ---
 
- 9. Summary (No Sugarcoating)
+## 9. Summary (No Sugarcoating)
 
 | Situation | Operator |
 | --------- | -------- |
@@ -200,7 +215,16 @@ That is:
 | Register  | `<=`     |
 
 If you violate this:
-➡ Your simulation may pass
-➡ Your FPGA will fail
 
+* Simulation might pass
+* FPGA will fail
 
+---
+
+**Bottom line:**
+Blocking is for **logic**.
+Non-blocking is for **memory**.
+
+Confuse them → you are not designing hardware, you are writing lies.
+
+---
